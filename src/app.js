@@ -1,21 +1,33 @@
 const express = require("express");
 const app = express();
 
-app.use("/static", express.static("public"));
+const User = require("./models/User.js")
 
-app.get("/", (req, res) => {
-  const msg = `This was a ${req.method} request from a browser.`;
-  res.send(msg);
+app.use(express.json());
+
+app.post("/", async (req, res) => {
+  try {
+    const user = await User.create(req.body);
+    if(!user) {
+      throw new isError("No user was created")
+    } 
+    res.send(user.username)
+  } catch (errors) {
+    console.log(`error: ${JSON.stringify(errors)}`)
+  }
 });
 
-function controller(req, res) {
-  const data = {
-    method: req.method,
-    num: Math.random(),
-    str: "Hello World!",
-  };
-  res.json(data);
-}
+app.get("/users", async (req, res) => {
+  try {
+    const users = await User.findAll();
+    if(!users) {
+      throw new Error("No users found");
+    } 
+    res.send(users)
+  } catch (error) {
+    //console.log(`${error}`)
+  }
 
-app.get("/extra", controller);
+});
+
 module.exports = app;
